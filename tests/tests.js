@@ -51,7 +51,7 @@ module.exports = enemy;
 
 },{}],2:[function(require,module,exports){
 var player = function(obj) {
-  var x = 350, y = 550, width = 20, height = 20;
+  var x = 350, y = 550, width = 20, height = 20, score = 0, lives = 5;
 
   if (obj !== undefined && obj.width !== undefined) {
     width = obj.width;
@@ -62,6 +62,20 @@ var player = function(obj) {
   }
 
   return {
+    loseLife: function() {
+      if (lives > 0) {
+        lives -= 1;
+      }
+    },
+    getLives: function() {
+      return lives;
+    },
+    incrementScore: function() {
+      score += 1;
+    },
+    getScore: function() {
+      return score;
+    },
     getPosition: function() {
       return {
         x: x,

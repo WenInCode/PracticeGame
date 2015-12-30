@@ -7,6 +7,7 @@
       display: block;
       position: absolute;
       margin: auto;
+      border: 1px solid black;
       top: 0;
       bottom: 0;
       left: 0;
@@ -15,6 +16,17 @@
   </style>
 </head>
 <body>
+  <div id="controls">
+    <h2>Controls:</h2>
+    <p><strong>Move Left:</strong> left arrow key</p>
+    <p><strong>Move Right:</strong> right arrow key</p>
+    <p><strong>Shoot:</strong> space key</p>
+  </div>
+  <div id="stats">
+    <h2>Stats:</h2>
+    <p id="score"><strong>Score:</strong> 0</p>
+    <p id="lives"><strong>Lives:</strong> 5</p>
+  </div>
 <script src="./dist/bundle.js" type="text/javascript"></script>
 </body>
 </html>

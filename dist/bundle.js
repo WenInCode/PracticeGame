@@ -18,8 +18,7 @@ var main = (function() {
     lastShot = 0,
     lastEnemy = 0,
     enemyTimer = 0,
-    score = 0,
-    lives = 5,
+    gameOver = false,
     action = {
       left: false,
       right: false,
@@ -71,6 +70,14 @@ var main = (function() {
     document.body.appendChild(canvas);
   }
 
+  function endGame() {
+    gameOver = true;
+    var gameOverElement = document.createElement("h1");
+    var gameOverText = document.createTextNode("Game Over!");
+    gameOverElement.appendChild(gameOverText);
+    document.body.appendChild(gameOverElement);
+  }
+
   function spawnEnemy() {
     if (Date.now() - lastEnemy > enemyTimer) {
       lastEnemy = Date.now();
@@ -94,7 +101,7 @@ var main = (function() {
       });
 
       if (hitFlag) {
-        score += 1;
+        updateScore();
       }
 
       return !hitFlag;
@@ -105,16 +112,25 @@ var main = (function() {
     // check which enemies made it through
     enemies = enemies.filter(function(e, index, array) {
       if (e.isOutOfBounds()) {
-        lives -= 1;
-        if (lives <= 0) {
-          // exit
-        }
-        console.log(lives);
+        updateLives();
         return false;
       } else {
         return true;
       }
     });
+  }
+
+  function updateLives() {
+    player.loseLife();
+    document.getElementById("lives").innerHTML = "<strong>Lives:</strong> " + player.getLives();
+    if (player.getLives() <= 0) {
+      endGame();
+    }
+  }
+
+  function updateScore() {
+    player.incrementScore();
+    document.getElementById("score").innerHTML = "<strong>Score:</strong> " + player.getScore();
   }
 
   function updatePlayer() {
@@ -165,17 +181,19 @@ var main = (function() {
   }
 
   function gameLoop() {
-    spawnEnemy();
-    handleShooting();
+    if (!gameOver) {
+      spawnEnemy();
+      handleShooting();
 
-    // redraw all elements -----
-    ctx.clearRect(0,0,canvas.width, canvas.height);
+      // redraw all elements -----
+      ctx.clearRect(0,0,canvas.width, canvas.height);
 
-    updatePlayer();
-    updateRockets();
-    updateEnemies();
-    // call for a new frame
-    window.requestAnimationFrame(gameLoop, canvas);
+      updatePlayer();
+      updateRockets();
+      updateEnemies();
+      // call for a new frame
+      window.requestAnimationFrame(gameLoop, canvas);
+    }
   }
 
   return {
@@ -252,7 +270,7 @@ module.exports = enemy;
 
 },{}],3:[function(require,module,exports){
 var player = function(obj) {
-  var x = 350, y = 550, width = 20, height = 20;
+  var x = 350, y = 550, width = 20, height = 20, score = 0, lives = 5;
 
   if (obj !== undefined && obj.width !== undefined) {
     width = obj.width;
@@ -263,6 +281,20 @@ var player = function(obj) {
   }
 
   return {
+    loseLife: function() {
+      if (lives > 0) {
+        lives -= 1;
+      }
+    },
+    getLives: function() {
+      return lives;
+    },
+    incrementScore: function() {
+      score += 1;
+    },
+    getScore: function() {
+      return score;
+    },
     getPosition: function() {
       return {
         x: x,
