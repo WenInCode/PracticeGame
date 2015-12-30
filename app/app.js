@@ -78,17 +78,6 @@ var main = (function() {
     }
   }
 
-  function moveEnemies() {
-    enemies.forEach(function(e) {
-      e.update(ctx);
-    });
-  }
-
-  function filterEnemies() {
-    enemiesHit();
-    enemiesOutOfBounds();
-  }
-
   function enemiesHit() {
     // check which enemies are hit
     enemies = enemies.filter(function(e, index, array) {
@@ -152,8 +141,14 @@ var main = (function() {
   }
 
   function updateEnemies() {
-    moveEnemies();
-    filterEnemies();
+    enemies.forEach(function(e) {
+      e.move();
+    });
+    enemiesHit();
+    enemiesOutOfBounds();
+    enemies.forEach(function(e) {
+      e.draw(ctx);
+    });
   }
 
   function handleShooting() {
@@ -188,11 +183,11 @@ var main = (function() {
       gameLoop: gameLoop,
       buildCanvas: buildCanvas,
       spawnEnemy: spawnEnemy,
-      moveEnemies: moveEnemies,
-      filterEnemies: filterEnemies,
       enemiesHit: enemiesHit,
       enemiesOutOfBounds: enemiesOutOfBounds,
       handleShooting: handleShooting,
+      updatePlayer: updatePlayer,
+      updateEnemies: updateEnemies,
       updateRockets: updateRockets
     }
   };

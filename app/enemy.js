@@ -12,10 +12,11 @@ var enemy = function() {
         y: y
       }
     },
-    update: function(ctx) {
+    move: function() {
       // update position
       y += speed;
-
+    },
+    draw: function(ctx) {
       // draw the ship
       ctx.beginPath();
       ctx.moveTo(x, y);
@@ -33,7 +34,14 @@ var enemy = function() {
       return false;
     },
     isOutOfBounds: function() {
-      return y >= 600;
+      return y >= 600 || y < 0;
+    },
+    _private: {
+      setY: function(val) {
+        if (val !== undefined && typeof val === 'number') {
+          y = val;
+        }
+      }
     }
   }
 };

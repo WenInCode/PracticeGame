@@ -1,4 +1,55 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var enemy = function() {
+  var y = 30,
+    x = Math.floor((Math.random() * 700) + 1),
+    speed = 2,
+    width = 30,
+    height = 30;
+
+  return {
+    getPosition: function() {
+      return {
+        x: x,
+        y: y
+      }
+    },
+    move: function() {
+      // update position
+      y += speed;
+    },
+    draw: function(ctx) {
+      // draw the ship
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x - (width/2), y - height);
+      ctx.lineTo(x + (width/2), y - height);
+      ctx.fill();
+    },
+    isHit: function(xVal, yVal) {
+      if ((xVal <= x + (width/2)) &&
+          (xVal >= x - (width/2)) &&
+          (yVal <= y) &&
+          (yVal >= y - height)) {
+        return true;
+      }
+      return false;
+    },
+    isOutOfBounds: function() {
+      return y >= 600 || y < 0;
+    },
+    _private: {
+      setY: function(val) {
+        if (val !== undefined && typeof val === 'number') {
+          y = val;
+        }
+      }
+    }
+  }
+};
+
+module.exports = enemy;
+
+},{}],2:[function(require,module,exports){
 var player = function(obj) {
   var x = 350, y = 550, width = 20, height = 20;
 
@@ -50,7 +101,7 @@ var player = function(obj) {
 
 module.exports = player;
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 var rocket = function(obj) {
   var x = 0,
     y = 0,
@@ -97,9 +148,10 @@ var rocket = function(obj) {
 
 module.exports = rocket;
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var player = require('../app/player');
 var rocket = require('../app/rocket');
+var enemy = require('../app/enemy');
 //var app = require('../app/app');
 
 // -- START PLAYER TESTS ----------------
@@ -236,5 +288,55 @@ QUnit.test("Module:Rocket - isExpired", function(assert) {
   assert.equal(position.y, -2, 'The initial y position of player should be -2');
   assert.ok(testRocket.isExpired(), 'Should return true');
 });
+// -- END ROCKET TESTS ----------------
 
-},{"../app/player":1,"../app/rocket":2}]},{},[3]);
+// -- START ENEMY TESTS ----------------
+QUnit.test("Module:Enemy - initializing", function(assert) {
+  // create test player
+  var testEnemy = enemy();
+
+  // initial positions
+  var position = testEnemy.getPosition();
+  assert.ok((position.x >= 0 && position.x <= 700), 'The initial x position should be between 0 & 700');
+  assert.equal(position.y, 30, 'The initial y position of enemy should be 30');
+});
+
+QUnit.test("Module:Enemy - move", function(assert) {
+  // create test player
+  var testEnemy = enemy();
+
+  // initial positions
+  var position = testEnemy.getPosition();
+  assert.ok((position.x >= 0 && position.x <= 700), 'The initial x position should be between 0 & 700');
+  assert.equal(position.y, 30, 'The initial y position of enemy should be 30');
+
+  var initialX = position.x;
+  testEnemy.move();
+  position = testEnemy.getPosition();
+  assert.equal(position.x, initialX, 'x should not change');
+  assert.equal(position.y, 32, 'y should now be 32');
+});
+
+QUnit.test("Module:Enemy - isOutOfBounds", function(assert) {
+  // create test player
+  var testEnemy = enemy();
+
+  // initial positions
+  var position = testEnemy.getPosition();
+  assert.ok((position.x >= 0 && position.x <= 700), 'The initial x position should be between 0 & 700');
+  assert.equal(position.y, 30, 'The initial y position of enemy should be 30');
+  assert.ok(!testEnemy.isOutOfBounds(), 'Enemy should be in bounds');
+
+  testEnemy._private.setY(602);
+  position = testEnemy.getPosition();
+  assert.equal(position.y, 602, 'y should now be 32');
+  assert.ok(testEnemy.isOutOfBounds(), 'Enemy out of bounds is true');
+
+  testEnemy._private.setY(-2);
+  position = testEnemy.getPosition();
+  assert.equal(position.y, -2, 'y should now be -2');
+  assert.ok(testEnemy.isOutOfBounds(), 'Enemy out of bounds is true');
+});
+// -- END ENEMY TESTS ----------------
+
+},{"../app/enemy":1,"../app/player":2,"../app/rocket":3}]},{},[4]);
