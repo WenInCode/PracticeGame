@@ -1,5 +1,5 @@
 var player = function(obj) {
-  var x = 350, y = 550, width = 20, height = 20, ctx;
+  var x = 350, y = 550, width = 20, height = 20;
 
   if (obj.width !== undefined) {
     width = obj.width;
@@ -7,10 +7,6 @@ var player = function(obj) {
 
   if (obj.height !== undefined) {
     height = obj.height;
-  }
-
-  if (obj.ctx !== undefined) {
-    ctx = obj.ctx;
   }
 
   return {
@@ -30,12 +26,23 @@ var player = function(obj) {
         x += 7;
       }
     },
-    draw: function() {
+    draw: function(ctx) {
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.lineTo(x - (width/2), y + height);
       ctx.lineTo(x + (width/2), y + height);
       ctx.fill();
+    },
+    _private: {
+      setX: function(val) {
+        if (val < 0) {
+          x = 0;
+        } else if (val > 700) {
+          x = 700;
+        } else {
+          x = val;
+        }
+      }
     }
   };
 };

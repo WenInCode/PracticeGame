@@ -26,19 +26,9 @@ var main = (function() {
       shoot: false
     },
     rockets = new Array(),
-    enemies = new Array();
-
-  // set up the canvas
-  canvas.width = width;
-  canvas.height = height;
-  var ctx = canvas.getContext('2d');
-  document.body.appendChild(canvas);
-
-  var player = ship({
-      width: 20,
-      height: 20,
-      ctx: ctx
-    });
+    enemies = new Array(),
+    ctx,
+    player;
 
   // event listeners ----------------------------------
   document.addEventListener('keydown', function(evt) {
@@ -62,12 +52,29 @@ var main = (function() {
   });
   // -------------------------------------------------
 
+  function init() {
+    buildCanvas();
+
+    player = ship({
+        width: 20,
+        height: 20
+      });
+
+    window.requestAnimationFrame(gameLoop);
+  }
+
+  function buildCanvas() {
+    // set up the canvas
+    canvas.width = width;
+    canvas.height = height;
+    ctx = canvas.getContext('2d');
+    document.body.appendChild(canvas);
+  }
+
   function spawnEnemy() {
     if (Date.now() - lastEnemy > enemyTimer) {
-      console.log('spawn enemy');
       lastEnemy = Date.now();
       enemyTimer = (Math.floor(Math.random() * 5000) + 1);
-
       enemies.push(enemy());
     }
   }
@@ -76,7 +83,14 @@ var main = (function() {
     enemies.forEach(function(e) {
       e.update(ctx);
     });
+  }
 
+  function filterEnemies() {
+    enemiesHit();
+    enemiesOutOfBounds();
+  }
+
+  function enemiesHit() {
     // check which enemies are hit
     enemies = enemies.filter(function(e, index, array) {
       var hitFlag = false;
@@ -93,10 +107,12 @@ var main = (function() {
       if (hitFlag) {
         score += 1;
       }
-      
+
       return !hitFlag;
     });
+  }
 
+  function enemiesOutOfBounds() {
     // check which enemies made it through
     enemies = enemies.filter(function(e, index, array) {
       if (e.isOutOfBounds()) {
@@ -110,7 +126,6 @@ var main = (function() {
         return true;
       }
     });
-
   }
 
   function movePlayer() {
@@ -152,15 +167,38 @@ var main = (function() {
 
     // redraw all elements -----
     ctx.clearRect(0,0,canvas.width, canvas.height);
+
     moveEnemies();
-    player.draw();
+    filterEnemies();
+
+    player.draw(ctx);
     updateRockets();
 
     // call for a new frame
     window.requestAnimationFrame(gameLoop, canvas);
   }
-  window.requestAnimationFrame(gameLoop);
-}());
+
+  return {
+    init: init,
+    _private: {
+      gameLoop: gameLoop,
+      buildCanvas: buildCanvas,
+      spawnEnemy: spawnEnemy,
+      moveEnemies: moveEnemies,
+      filterEnemies: filterEnemies,
+      enemiesHit: enemiesHit,
+      enemiesOutOfBounds: enemiesOutOfBounds,
+      movePlayer: movePlayer,
+      handleShooting: handleShooting,
+      updateRockets: updateRockets
+    }
+  };
+});
+
+module.exports = main;
+
+var app = main();
+app.init();
 
 },{"./enemy":2,"./player":3,"./rocket":4}],2:[function(require,module,exports){
 var enemy = function() {
@@ -207,7 +245,7 @@ module.exports = enemy;
 
 },{}],3:[function(require,module,exports){
 var player = function(obj) {
-  var x = 350, y = 550, width = 20, height = 20, ctx;
+  var x = 350, y = 550, width = 20, height = 20;
 
   if (obj.width !== undefined) {
     width = obj.width;
@@ -215,10 +253,6 @@ var player = function(obj) {
 
   if (obj.height !== undefined) {
     height = obj.height;
-  }
-
-  if (obj.ctx !== undefined) {
-    ctx = obj.ctx;
   }
 
   return {
@@ -238,12 +272,23 @@ var player = function(obj) {
         x += 7;
       }
     },
-    draw: function() {
+    draw: function(ctx) {
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.lineTo(x - (width/2), y + height);
       ctx.lineTo(x + (width/2), y + height);
       ctx.fill();
+    },
+    _private: {
+      setX: function(val) {
+        if (val < 0) {
+          x = 0;
+        } else if (val > 700) {
+          x = 700;
+        } else {
+          x = val;
+        }
+      }
     }
   };
 };
