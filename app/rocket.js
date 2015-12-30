@@ -1,3 +1,13 @@
+'use strict';
+
+/*
+  Module: rocket
+  Parameters: object containing and x, y property representing the starting coordinates
+  Description: represents a rocket fired by the player ship. Returns the
+    necessary functions to operate the ship. Should be initialized with an
+    object containing and x, y property representing the starting coordinates;
+    otherwise the rocket starts at (0, 0)
+*/
 var rocket = function(obj) {
   var x = 0,
     y = 0,
@@ -14,18 +24,37 @@ var rocket = function(obj) {
   }
 
   return {
+    /*
+      Function: getPosition
+      Description: return the rocket's current position (x,y) as an object
+    */
     getPosition: function() {
       return {
         x: x,
         y: y
       };
     },
+    /*
+      Function: isExpired
+      Description: return whether or not the rocket has reached the end of
+        the canvas.
+    */
     isExpired: function() {
       return y <= 0;
     },
+    /*
+      Function: move
+      Description: descrments the rocket's y coordinate by it's current speed,
+        moving it upwards on the canvas.
+    */
     move: function() {
       y -= speed;
     },
+    /*
+      Function: draw
+      Parameters: ctx - a canvas context
+      Description: Draw the rocket at it's current position on the canvas.
+    */
     draw: function(ctx) {
       // use context to draw
       ctx.beginPath();

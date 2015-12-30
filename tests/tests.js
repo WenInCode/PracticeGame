@@ -1,4 +1,11 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
+
+/*
+  Module: enemy
+  Description: represents an enemy ship. Returns the necessary
+    functions to operate the ship.
+*/
 var enemy = function() {
   var y = 30,
     x = Math.floor((Math.random() * 700) + 1),
@@ -7,16 +14,29 @@ var enemy = function() {
     height = 30;
 
   return {
+    /*
+      Function: getPosition
+      Description: return the enemy's current position (x,y) as an object
+    */
     getPosition: function() {
       return {
         x: x,
         y: y
       }
     },
+    /*
+      Function: move
+      Description: increments the ships y coordinate by it's current speed
+    */
     move: function() {
       // update position
       y += speed;
     },
+    /*
+      Function: draw
+      Parameters: ctx - a canvas context
+      Description: Draw the enemy ship at it's current position on the canvas.
+    */
     draw: function(ctx) {
       // draw the ship
       ctx.beginPath();
@@ -25,6 +45,14 @@ var enemy = function() {
       ctx.lineTo(x + (width/2), y - height);
       ctx.fill();
     },
+    /*
+      Function: isHit
+      Parameters:
+        xVal - x value (number)
+        yVal - y value (number)
+      Description: returns whether or not a the passed coordinates are in the
+        enemy ship's collision box
+    */
     isHit: function(xVal, yVal) {
       if ((xVal <= x + (width/2)) &&
           (xVal >= x - (width/2)) &&
@@ -34,6 +62,11 @@ var enemy = function() {
       }
       return false;
     },
+    /*
+      Function: isOutOfBounds
+      Description: return whether or not the enemy ship has reached the end of
+        the canvas.
+    */
     isOutOfBounds: function() {
       return y >= 600 || y < 0;
     },
@@ -50,8 +83,16 @@ var enemy = function() {
 module.exports = enemy;
 
 },{}],2:[function(require,module,exports){
+'use strict';
+
+/*
+  Module: player
+  Description: represents the players ship. Can be initialized with an object.
+    only x & y properties, but doesn't need to be. returns the necessary
+    functions to operate the ship.
+*/
 var player = function(obj) {
-  var x = 350, y = 550, width = 20, height = 20, score = 0, lives = 5;
+  var x = 350, y = 550, width = 20, height = 20, score = 0, lives = 5, speed = 7;
 
   if (obj !== undefined && obj.width !== undefined) {
     width = obj.width;
@@ -62,36 +103,69 @@ var player = function(obj) {
   }
 
   return {
+    /*
+      Function: loseLife
+      Description: remove one life from the private variable lives.
+    */
     loseLife: function() {
       if (lives > 0) {
         lives -= 1;
       }
     },
+    /*
+      Function: getLives
+      Description: return number of remaining lives
+    */
     getLives: function() {
       return lives;
     },
+    /*
+      Function: incrementScore
+      Description: add one to the private score variable
+    */
     incrementScore: function() {
       score += 1;
     },
+    /*
+      Function: getScore
+      Description: return the current score
+    */
     getScore: function() {
       return score;
     },
+    /*
+      Function: getPosition
+      Description: return the players current position (x,y) as an object
+    */
     getPosition: function() {
       return {
         x: x,
         y: y
       };
     },
+    /*
+      Function: moveLeft
+      Description: decrements the players x value by the current speed (7)
+    */
     moveLeft: function() {
       if (x >= 7) {
-        x -= 7;
+        x -= speed;
       }
     },
+    /*
+      Function: moveRight
+      Description: increments the players x value by the current speed (7)
+    */
     moveRight: function() {
       if (x <= 693) {
-        x += 7;
+        x += speed;
       }
     },
+    /*
+      Function: draw
+      Parameters: ctx - a canvas context
+      Description: Draw the player at it's current position on the canvas.
+    */
     draw: function(ctx) {
       ctx.beginPath();
       ctx.moveTo(x, y);
@@ -116,6 +190,16 @@ var player = function(obj) {
 module.exports = player;
 
 },{}],3:[function(require,module,exports){
+'use strict';
+
+/*
+  Module: rocket
+  Parameters: object containing and x, y property representing the starting coordinates
+  Description: represents a rocket fired by the player ship. Returns the
+    necessary functions to operate the ship. Should be initialized with an
+    object containing and x, y property representing the starting coordinates;
+    otherwise the rocket starts at (0, 0)
+*/
 var rocket = function(obj) {
   var x = 0,
     y = 0,
@@ -132,18 +216,37 @@ var rocket = function(obj) {
   }
 
   return {
+    /*
+      Function: getPosition
+      Description: return the rocket's current position (x,y) as an object
+    */
     getPosition: function() {
       return {
         x: x,
         y: y
       };
     },
+    /*
+      Function: isExpired
+      Description: return whether or not the rocket has reached the end of
+        the canvas.
+    */
     isExpired: function() {
       return y <= 0;
     },
+    /*
+      Function: move
+      Description: descrments the rocket's y coordinate by it's current speed,
+        moving it upwards on the canvas.
+    */
     move: function() {
       y -= speed;
     },
+    /*
+      Function: draw
+      Parameters: ctx - a canvas context
+      Description: Draw the rocket at it's current position on the canvas.
+    */
     draw: function(ctx) {
       // use context to draw
       ctx.beginPath();
