@@ -128,12 +128,33 @@ var main = (function() {
     });
   }
 
-  function movePlayer() {
+  function updatePlayer() {
     if (action.left) {
       player.moveLeft();
     } else if (action.right) {
       player.moveRight();
     }
+
+    player.draw(ctx);
+  }
+
+  function updateRockets() {
+    rockets.forEach(function(rkt, index, array) {
+      rkt.move();
+    });
+
+    rockets = rockets.filter(function(rkt) {
+      return !rkt.isExpired();
+    });
+
+    rockets.forEach(function(rkt, index, array) {
+      rkt.draw(ctx);
+    });
+  }
+
+  function updateEnemies() {
+    moveEnemies();
+    filterEnemies();
   }
 
   function handleShooting() {
@@ -148,32 +169,16 @@ var main = (function() {
     }
   }
 
-  function updateRockets() {
-    rockets.forEach(function(rkt, index, array) {
-      rkt.update(ctx);
-    });
-
-    rockets = rockets.filter(function(rkt) {
-      return !rkt.isExpired();
-    });
-  }
-
   function gameLoop() {
-    // handle update all positions -------
     spawnEnemy();
-    movePlayer();
-
     handleShooting();
 
     // redraw all elements -----
     ctx.clearRect(0,0,canvas.width, canvas.height);
 
-    moveEnemies();
-    filterEnemies();
-
-    player.draw(ctx);
+    updatePlayer();
     updateRockets();
-
+    updateEnemies();
     // call for a new frame
     window.requestAnimationFrame(gameLoop, canvas);
   }
@@ -188,7 +193,6 @@ var main = (function() {
       filterEnemies: filterEnemies,
       enemiesHit: enemiesHit,
       enemiesOutOfBounds: enemiesOutOfBounds,
-      movePlayer: movePlayer,
       handleShooting: handleShooting,
       updateRockets: updateRockets
     }
@@ -247,11 +251,11 @@ module.exports = enemy;
 var player = function(obj) {
   var x = 350, y = 550, width = 20, height = 20;
 
-  if (obj.width !== undefined) {
+  if (obj !== undefined && obj.width !== undefined) {
     width = obj.width;
   }
 
-  if (obj.height !== undefined) {
+  if (obj !== undefined && obj.height !== undefined) {
     height = obj.height;
   }
 
@@ -301,14 +305,13 @@ var rocket = function(obj) {
     y = 0,
     width = 5,
     height = 5,
-    speed = 5,
-    hitFlag = false;
+    speed = 5;
 
   // initialize if the object is passed
-  if (obj.x !== undefined) {
+  if (obj !== undefined && obj.x !== undefined) {
     x = obj.x;
   }
-  if (obj.y !== undefined) {
+  if (obj !== undefined && obj.y !== undefined) {
     y = obj.y;
   }
 
@@ -322,19 +325,21 @@ var rocket = function(obj) {
     isExpired: function() {
       return y <= 0;
     },
-    isHit: function() {
-      return hitFlag;
-    },
-    setHit: function() {
-      hitFlag = true;
-    },
-    update: function(ctx) {
+    move: function() {
       y -= speed;
-
+    },
+    draw: function(ctx) {
       // use context to draw
       ctx.beginPath();
       ctx.arc(x, y, 2, 0, Math.PI*2, true);
       ctx.fill();
+    },
+    _private: {
+      setY: function(val) {
+        if (val !== undefined && typeof val === 'number') {
+          y = val;
+        }
+      }
     }
   }
 };

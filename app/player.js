@@ -1,11 +1,11 @@
 var player = function(obj) {
   var x = 350, y = 550, width = 20, height = 20;
 
-  if (obj.width !== undefined) {
+  if (obj !== undefined && obj.width !== undefined) {
     width = obj.width;
   }
 
-  if (obj.height !== undefined) {
+  if (obj !== undefined && obj.height !== undefined) {
     height = obj.height;
   }
 

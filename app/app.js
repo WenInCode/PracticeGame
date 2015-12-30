@@ -127,12 +127,33 @@ var main = (function() {
     });
   }
 
-  function movePlayer() {
+  function updatePlayer() {
     if (action.left) {
       player.moveLeft();
     } else if (action.right) {
       player.moveRight();
     }
+
+    player.draw(ctx);
+  }
+
+  function updateRockets() {
+    rockets.forEach(function(rkt, index, array) {
+      rkt.move();
+    });
+
+    rockets = rockets.filter(function(rkt) {
+      return !rkt.isExpired();
+    });
+
+    rockets.forEach(function(rkt, index, array) {
+      rkt.draw(ctx);
+    });
+  }
+
+  function updateEnemies() {
+    moveEnemies();
+    filterEnemies();
   }
 
   function handleShooting() {
@@ -147,32 +168,16 @@ var main = (function() {
     }
   }
 
-  function updateRockets() {
-    rockets.forEach(function(rkt, index, array) {
-      rkt.update(ctx);
-    });
-
-    rockets = rockets.filter(function(rkt) {
-      return !rkt.isExpired();
-    });
-  }
-
   function gameLoop() {
-    // handle update all positions -------
     spawnEnemy();
-    movePlayer();
-
     handleShooting();
 
     // redraw all elements -----
     ctx.clearRect(0,0,canvas.width, canvas.height);
 
-    moveEnemies();
-    filterEnemies();
-
-    player.draw(ctx);
+    updatePlayer();
     updateRockets();
-
+    updateEnemies();
     // call for a new frame
     window.requestAnimationFrame(gameLoop, canvas);
   }
@@ -187,7 +192,6 @@ var main = (function() {
       filterEnemies: filterEnemies,
       enemiesHit: enemiesHit,
       enemiesOutOfBounds: enemiesOutOfBounds,
-      movePlayer: movePlayer,
       handleShooting: handleShooting,
       updateRockets: updateRockets
     }
