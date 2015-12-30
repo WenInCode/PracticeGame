@@ -1,5 +1,10 @@
 var rocket = function(obj) {
-  var x = 0, y = 0, width = 5, height = 5, speed = 5;
+  var x = 0,
+    y = 0,
+    width = 5,
+    height = 5,
+    speed = 5,
+    hitFlag = false;
 
   // initialize if the object is passed
   if (obj.x !== undefined) {
@@ -18,6 +23,12 @@ var rocket = function(obj) {
     },
     isExpired: function() {
       return y <= 0;
+    },
+    isHit: function() {
+      return hitFlag;
+    },
+    setHit: function() {
+      hitFlag = true;
     },
     update: function(ctx) {
       y -= speed;

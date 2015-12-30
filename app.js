@@ -1,5 +1,8 @@
+'use strict';
+
 var ship = require('./player');
 var rocket = require('./rocket');
+var enemy = require('./enemy');
 
 var main = (function() {
 
@@ -12,17 +15,22 @@ var main = (function() {
     rightKet = 39,
     spaceKey = 32,
     lastShot = 0,
+    lastEnemy = 0,
+    enemyTimer = 0,
+    score = 0,
+    lives = 5,
     action = {
       left: false,
       right: false,
       shoot: false
     },
-    rockets = new Array();
+    rockets = new Array(),
+    enemies = new Array();
 
   // set up the canvas
   canvas.width = width;
   canvas.height = height;
-  ctx = canvas.getContext('2d');
+  var ctx = canvas.getContext('2d');
   document.body.appendChild(canvas);
 
   var player = ship({
@@ -51,16 +59,68 @@ var main = (function() {
       action.shoot = false;
     }
   });
+  // -------------------------------------------------
 
-  function gameLoop() {
+  function spawnEnemy() {
+    if (Date.now() - lastEnemy > enemyTimer) {
+      console.log('spawn enemy');
+      lastEnemy = Date.now();
+      enemyTimer = (Math.floor(Math.random() * 5000) + 1);
 
-    // handle update all positions -------
+      enemies.push(enemy());
+    }
+  }
+
+  function moveEnemies() {
+    enemies.forEach(function(e) {
+      e.update(ctx);
+    });
+
+    // check which enemies are hit
+    enemies = enemies.filter(function(e, index, array) {
+      var hitFlag = false;
+
+      rockets = rockets.filter(function(rkt, i, r) {
+        var currentPosition = rkt.getPosition();
+        if (e.isHit(currentPosition.x, currentPosition.y)) {
+          hitFlag = true;
+          return false;
+        }
+        return true;
+      });
+
+      if (hitFlag) {
+        score += 1;
+      }
+      
+      return !hitFlag;
+    });
+
+    // check which enemies made it through
+    enemies = enemies.filter(function(e, index, array) {
+      if (e.isOutOfBounds()) {
+        lives -= 1;
+        if (lives <= 0) {
+          // exit
+        }
+        console.log(lives);
+        return false;
+      } else {
+        return true;
+      }
+    });
+
+  }
+
+  function movePlayer() {
     if (action.left) {
       player.moveLeft();
     } else if (action.right) {
       player.moveRight();
     }
+  }
 
+  function handleShooting() {
     if (action.shoot && (Date.now() - lastShot > 500)) {
       console.log("shooting!!!");
       lastShot = Date.now();
@@ -70,16 +130,30 @@ var main = (function() {
         y: pos.y
       }));
     }
+  }
+
+  function updateRockets() {
+    rockets.forEach(function(rkt, index, array) {
+      rkt.update(ctx);
+    });
+
+    rockets = rockets.filter(function(rkt) {
+      return !rkt.isExpired();
+    });
+  }
+
+  function gameLoop() {
+    // handle update all positions -------
+    spawnEnemy();
+    movePlayer();
+
+    handleShooting();
 
     // redraw all elements -----
     ctx.clearRect(0,0,canvas.width, canvas.height);
+    moveEnemies();
     player.draw();
-    rockets.forEach(function(rocket, index, array) {
-      rocket.update(ctx);
-    });
-    rockets = rockets.filter(function(rocket) {
-      return !rocket.isExpired();
-    });
+    updateRockets();
 
     // call for a new frame
     window.requestAnimationFrame(gameLoop, canvas);
